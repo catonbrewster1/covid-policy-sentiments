@@ -15,7 +15,6 @@ import util
 
 
 starting_url = ("https://coronavirus.illinois.gov/resources/executive-orders.html")
-#index_dict = {}
 order_list = []
 count = 0
 
@@ -28,6 +27,15 @@ for tag in soup_page.find_all('a'):
         if "executive-order" in url and "html" in url and \
             url not in order_list and "display" in url:
             page = convert_url(url)
+            for tag_div in page.find_all('div', class_ = "cmp-text"):
+                for tag_p in tag_div.find_all('p'):
+                    #doesnt' seem to recognize text that I check for inside of tag_p...
+                    if "Issued" in tag_p:
+                        print(tag_p)
+                    else:
+                        print("Not in it: ")
+                        print(tag_p)
+                        print("")
 
 
 with open(index_filename, 'w') as f:

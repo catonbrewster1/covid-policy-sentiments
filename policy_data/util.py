@@ -129,59 +129,6 @@ ARCHIVES_HTTP = ("http://www.classes.cs.uchicago.edu/archive/2015/winter"
 LEN_ARCHIVES_HTTP = len(ARCHIVES_HTTP)
 
 
-def is_url_ok_to_follow(url, limiting_domain):
-    '''
-    Inputs:
-        url: absolute URL
-        limiting domain: domain name
-
-    Outputs:
-        Returns True if the protocol for the URL is HTTP, the domain
-        is in the limiting domain, and the path is either a directory
-        or a file that has no extension or ends in .html. URLs
-        that include an "@" are not OK to follow.
-
-    Examples:
-        is_url_ok_to_follow("http://cs.uchicago.edu/pa/pa1", "cs.uchicago.edu")
-            yields True
-
-        is_url_ok_to_follow("http://cs.cornell.edu/pa/pa1", "cs.uchicago.edu")
-            yields False
-    '''
-
-    if "mailto:" in url:
-        return False
-
-    if "@" in url:
-        return False
-
-    if url[:LEN_ARCHIVES] == ARCHIVES or url[:LEN_ARCHIVES_HTTP] == ARCHIVES_HTTP:
-        return False
-
-    parsed_url = urllib.parse.urlparse(url)
-    if parsed_url.scheme != "http" and parsed_url.scheme != "https":
-        return False
-
-    if parsed_url.netloc == "":
-        return False
-
-    if parsed_url.fragment != "":
-        return False
-
-    if parsed_url.query != "":
-        return False
-
-    loc = parsed_url.netloc
-    ld = len(limiting_domain)
-    trunc_loc = loc[-(ld+1):]
-    if not (limiting_domain == loc or (trunc_loc == "." + limiting_domain)):
-        return False
-
-    # does it have the right extension
-    (filename, ext) = os.path.splitext(parsed_url.path)
-    return (ext == "" or ext == ".html")
-
-
 def is_subsequence(tag):
     '''
     Does the tag represent a subsequence?
