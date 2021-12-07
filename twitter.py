@@ -3,10 +3,14 @@ Code to get Twitter data via API
 '''
 
 
-import json, tweepy, time, sys, os, random
-import tempfile, requests
-import urlib.request
-from os import environ
+import boto3
+import time
+import random
+import datetime
+import json
+import paramiko
+import tweepy
+from scp import SCPClient
 
 '''
 api key: bzVIDZamtYW6UKOk1V7DSFThW
@@ -50,3 +54,72 @@ waiter.wait(InstanceIds=[instance.id for instance in instances])
 code = ['twitter_consumer.py', 'twitter_producer.py']
 ssh_producer, ssh_consumer = paramiko.SSHClient(), paramiko.SSHClient()
 
+# Install boto3 on each EC2 instance and Copy our producer/consumer code onto producer/consumer EC2 instances
+instance = 0
+stdin, stdout, stderr = [[None, None] for i in range(3)]
+for ssh in [ssh_producer, ssh_consumer]:
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    ssh.connect(instance_dns[instance],
+                username = 'ec2-user',
+                key_filename='/Users/catonbrewster/Box Sync/Y2 - Q1 Fall/LSC/Project/covid-policy-sentiments/macs_30123_CB.pem')
+    
+    with SCPClient(ssh.get_transport()) as scp:
+        scp.put(code[instance])
+    
+    if instance == 0:
+        stdin[instance], stdout[instance], stderr[instance] = \
+            ssh.exec_command("sudo pip3 install boto3")
+    else:
+        stdin[instance], stdout[instance], stderr[instance] = \
+            ssh.exec_command("sudo pip3 install boto3")
+
+    instance += 1
+
+# Block until Producer has installed boto3 and testdata, then start running Producer script:
+producer_exit_status = stdout[0].channel.recv_exit_status() 
+if producer_exit_status == 0:
+    ssh_producer.exec_command("python3 %s" % code[0])
+    print(code[0])
+    print("Producer Instance is Running twitter_producer.py\n.........................................")
+else:
+    print("Error", producer_exit_status)
+
+# Block until Consumer has installed boto3 and testdata, then start running Consumer script:
+consumer_exit_status = stdout[1].channel.recv_exit_status() 
+if consumer_exit_status == 0:
+    ssh_producer.exec_command("python3 %s" % code[1])
+    print(code[1])
+    print("Consumer Instance is Running twitter_consumer.py\n.........................................")
+else:
+    print("Error", consumer_exit_status)
+
+# Close ssh
+ssh_consumer.close; ssh_producer.close()
+
+
+# check bucket
+my_bucket = "lsc-project"
+for my_bucket_object in my_bucket.objects.all():
+    print(my_bucket_object.key)
+
+'''
+(for personal use): Delete everything as needed
+s3 = boto3.resource('s3')
+bucket = s3.Bucket('lsc-project')
+bucket.objects.all().delete()
+bucket.delete()
+
+ec2 = boto3.resource('ec2')
+ids = []
+for instance in ec2.instances.all():
+    ids.append(instance.id)
+ec2.instances.filter(InstanceIds = ids).terminate()
+
+response = client.delete_stream(
+    StreamName='twitter_stream',
+    EnforceConsumerDeletion=True
+waiter = kinesis.get_waiter('stream_deleted')
+waiter.wait(StreamName='twitter_stream')
+
+)
+'''

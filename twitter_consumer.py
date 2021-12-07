@@ -59,7 +59,7 @@ data = {
   },
 }
 
-sess = sagemaker.Session()
+
 kinesis = boto3.client('kinesis', region_name='us-east-1')
 shard_it = kinesis.get_shard_iterator(StreamName="twitter_stream",
                                      ShardId='shardId-000000000000',
@@ -67,43 +67,23 @@ shard_it = kinesis.get_shard_iterator(StreamName="twitter_stream",
                                      )["ShardIterator"]
 
 
-try:
-    role = sagemaker.get_execution_role()
-except ValueError:
-    iam = boto3.client('iam')
-    role = iam.get_role(RoleName='sage')['Role']['Arn']
-
-# Hub Model configuration. https://huggingface.co/models
-hub = {
-  'HF_MODEL_ID':'distilbert-base-uncased-emotion', # model_id from hf.co/models
-  'HF_TASK':'sentiment-analysis' # NLP task you want to use for predictions
-}
-
-# create Hugging Face Model Class
-huggingface_model = HuggingFaceModel(
-   env=hub,
-   role=role, # iam role with permissions to create an Endpoint
-   transformers_version="4.6", # transformers version used
-   pytorch_version="1.7", # pytorch version used
-   py_version="py36", # python version of the DLC
-)
-
-# deploy model to SageMaker Inference
-predictor = huggingface_model.deploy(
-   initial_instance_count=1,
-   instance_type="ml.m5.xlarge"
-)
-
 while True:
 
     out = kinesis.get_records(ShardIterator=shard_it,
                               Limit=1)
-    for o in out['Records']:
+    for i, o in enumerate(out['Records']):
         data = json.loads(o["Data"])
-        #get the names of the variables we want to run sent analysis on
+        #get the names of the variables we want to run sentiment analysis on
         tweet = data["text"]
-        data["sentiment"] = predictor.predict(tweet)
-        
+        #data["sentiment"] 
+        print(tweet)
+        #add json file to bucket
+        file_name = data["id_str"] + ".json"
+        s3.put_object(Body=json.dumps(data),
+                  Bucket = 'lsc-project', 
+                  Key = file_name)
+        if i == 100: 
+          break
 
     shard_it = out['NextShardIterator']
     time.sleep(0.2)
