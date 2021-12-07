@@ -1,0 +1,16 @@
+service: bitacora-find-emotions
+
+provider:
+  name: aws
+  region: us-west-2
+  memorySize: 5120
+  timeout: 60
+  stage: dev
+  role: arn:aws:iam::401913772240:role/lambda-gateway-execution-role
+  deploymentBucket:
+    name: dive-serverless-deployments
+    deploymentPrefix: tu-service
+
+functions:
+  emotions:
+    image:
