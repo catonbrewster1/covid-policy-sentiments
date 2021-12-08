@@ -14,34 +14,36 @@ ACCESS_KEY = "1467552250457473026-685etojXLSdPjZkbBrxtwo5aSKExpO"
 ACCESS_SECRET = "KcPKGnpnylEZ26jivTZUC2nrRNL2CoJVpCcQED0RklP8R"
 
 auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-aut.set_access_token(ACCESS_KEY, ACCESS_SECRET)
+auth.set_access_token(ACCESS_KEY, ACCESS_SECRET)
 
-api = tweepy.API(auth, wait_on_rate_limi=True, 
-                    wait_on_rate_limit_notify=True)
+api = tweepy.API(auth, wait_on_rate_limit=True)
 
-SEARCH_TERMS = ["covid", 
-                "covid-19", 
-                "covid19", 
-                "coronavirus",
-                "masks", 
-                "vaccine", 
-                "vaccination", 
-                "school closing", 
-                "schoolclosing"]
+SEARCH_TERMS = ['covid', 'avanzan', 'apertura', 'retroceden']
+# SEARCH_TERMS = ["covid", 
+#                 "covid-19", 
+#                 "covid19", 
+#                 "coronavirus",
+#                 "masks", 
+#                 "vaccine", 
+#                 "vaccination", 
+#                 "school closing", 
+#                 "schoolclosing"]
 
 def getReferrer():
     q = " OR ".join(SEARCH_TERMS)
-    places = api.geo_search(query="United States", granularity="country")
-    place_id = places[0].id
+    #places = api.search_geo(query="Chile", granularity="country")
+    #place_id = places[0].id
     ht_list_no_RT = q + " -filter:retweets"
     for tweet in tweepy.Cursor(api.search, 
-                                q=(ht_list_no_RT) and ("place:%s" % place_id), 
+                                q=ht_list_no_RT, 
+                                geo='-33.447487, -70.673676, 100',
                                 tweet_mode='extended', 
                                 count=100, 
                                 include_entities=True,
-                                lang="en").items():
+                                lang="es").items()[:10]:
                                     
         tweet_dic = tweet._json
+        print('tweet_dic')
         return tweet_dic
     
 

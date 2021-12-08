@@ -1,11 +1,12 @@
 import boto3
 import time
 import json
-from transformers import pipeline
-import sagemaker
-from sagemaker.huggingface.model import HuggingFaceModel
+import requests
+#from transformers import pipeline
+#import sagemaker
+#from sagemaker.huggingface.model import HuggingFaceModel
 
-
+url = "https://427e20rcv8.execute-api.us-east-1.amazonaws.com/dev/search"
 data = {
   "created_at": "Thu Jun 22 21:00:00 +0000 2017",
   "id": 877994604561387500,
@@ -67,6 +68,8 @@ shard_it = kinesis.get_shard_iterator(StreamName="twitter_stream",
                                      )["ShardIterator"]
 
 
+s3 = boto3.client('s3')
+
 while True:
 
     out = kinesis.get_records(ShardIterator=shard_it,
@@ -75,16 +78,25 @@ while True:
         data = json.loads(o["Data"])
         #get the names of the variables we want to run sentiment analysis on
         tweet = data["text"]
-        #data["sentiment"] 
+        payload = {
+          'text': tweet,
+          'max': True }
+        response = requests.post(url, json=payload)
+        ans = json.loads(response.text)
+        while ans == 'Endpoint request timed out':
+          response = requests.post(url, json=payload)
+          ans = json.loads(response.text)
+        data["sentiment"] = ans
         print(tweet)
         #add json file to bucket
         file_name = data["id_str"] + ".json"
         s3.put_object(Body=json.dumps(data),
-                  Bucket = 'lsc-project', 
+                  Bucket = 'lsc-project-cbgpas', 
                   Key = file_name)
         if i == 100: 
           break
 
     shard_it = out['NextShardIterator']
     time.sleep(0.2)
-    predictor.delete_endpoint()
+    print('done')
+    # predictor.delete_endpoint()

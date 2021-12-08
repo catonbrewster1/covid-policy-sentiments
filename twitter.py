@@ -22,7 +22,9 @@ bearer token: AAAAAAAAAAAAAAAAAAAAANtFWgEAAAAAmNGQiuKLEfM6%2F4KDDy7I8GGyfbw%3DLj
 session = boto3.Session(profile_name='default')
 kinesis = session.client('kinesis')
 s3 = boto3.client('s3')
-bucket = s3.create_bucket(Bucket='lsc-project')
+bucket = s3.create_bucket(Bucket='lsc-project-cbgpas')
+ec2 = session.resource('ec2')
+ec2_client = session.client('ec2')
 
 #creating ec2 instance
 
@@ -30,8 +32,8 @@ instances = ec2.create_instances(ImageId='ami-02e136e904f3da870',
                                  MinCount=1,
                                  MaxCount=2,
                                  InstanceType='t2.micro',
-                                 KeyName='macs_30123_CB',
-                                 SecurityGroupIds=['sg-01f3da276301638af'],
+                                 KeyName='stock_stream',
+                                 SecurityGroupIds=['sg-0ab0bb5af0aa4735d'],
                                  SecurityGroups=['launch-wizard-1'],
                                  IamInstanceProfile=
                                      {'Name': 'EMR_EC2_DefaultRole'},
@@ -51,6 +53,11 @@ waiter.wait(StreamName='twitter_stream')
 waiter = ec2_client.get_waiter('instance_running')
 waiter.wait(InstanceIds=[instance.id for instance in instances])
 
+instance_dns = [instance.public_dns_name
+                 for instance in ec2.instances.all()
+                 if instance.state['Name'] == 'running'
+               ]
+
 code = ['twitter_consumer.py', 'twitter_producer.py']
 ssh_producer, ssh_consumer = paramiko.SSHClient(), paramiko.SSHClient()
 
@@ -61,7 +68,7 @@ for ssh in [ssh_producer, ssh_consumer]:
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(instance_dns[instance],
                 username = 'ec2-user',
-                key_filename='/Users/catonbrewster/Box Sync/Y2 - Q1 Fall/LSC/Project/covid-policy-sentiments/macs_30123_CB.pem')
+                key_filename='stock_stream.pem')
     
     with SCPClient(ssh.get_transport()) as scp:
         scp.put(code[instance])
@@ -98,14 +105,14 @@ ssh_consumer.close; ssh_producer.close()
 
 
 # check bucket
-my_bucket = "lsc-project"
+my_bucket = "lsc-project-cbgpas"
 for my_bucket_object in my_bucket.objects.all():
     print(my_bucket_object.key)
 
 '''
 (for personal use): Delete everything as needed
 s3 = boto3.resource('s3')
-bucket = s3.Bucket('lsc-project')
+bucket = s3.Bucket('lsc-project-cbgpas')
 bucket.objects.all().delete()
 bucket.delete()
 
