@@ -9,30 +9,29 @@ import random
 import datetime
 import json
 import paramiko
-import tweepy
 from scp import SCPClient
 
-'''
-api key: bzVIDZamtYW6UKOk1V7DSFThW
-api key secret: 7i5cVfdKUobpMVQaz6R1RbM3hhqLuTLSf2qfTRlVd5xcR4uYHk
-bearer token: AAAAAAAAAAAAAAAAAAAAANtFWgEAAAAAmNGQiuKLEfM6%2F4KDDy7I8GGyfbw%3DLj3rKK77t0fsr4JvieG0K5ybkyetijAbsB5p8rXRtqJSD7c6ex
-'''
+#UPDATE AS NEEDED
+PEM_KEY_NAME = 'macs_30123_CB'
+PEM_KEY_FILENAME = '/Users/catonbrewster/Box Sync/Y2 - Q1 Fall/LSC/Project/covid-policy-sentiments/macs_30123_CB.pem'
 
-#Step 1. Create S3 Bucket, EC2 Instances, Kinesis Stream
+
+# Launch session and clients
 session = boto3.Session(profile_name='default')
 kinesis = session.client('kinesis')
-s3 = boto3.client('s3')
-
 ec2 = session.resource('ec2')
 ec2_client = session.client('ec2')
 
-#creating ec2 instance
+# Create bucket to store results in
+s3 = boto3.client('s3')
+bucket = s3.create_bucket(Bucket='lsc-sentiments')
 
+# Create ec2 instances (x2)
 instances = ec2.create_instances(ImageId='ami-02e136e904f3da870',
                                  MinCount=1,
                                  MaxCount=2,
                                  InstanceType='t2.micro',
-                                 KeyName='macs_30123_CB',
+                                 KeyName=PEM_KEY_NAME,
                                  SecurityGroupIds=['sg-01f3da276301638af'],
                                  SecurityGroups=['launch-wizard-1'],
                                  IamInstanceProfile=
@@ -56,7 +55,7 @@ instance_dns = [instance.public_dns_name
                  for instance in ec2.instances.all() 
                  if instance.state['Name'] == 'running'
                ]
-code = ['twitter_consumer.py', 'twitter_producer.py']
+code = ['twitter_producer.py', 'twitter_consumer.py']
 ssh_producer, ssh_consumer = paramiko.SSHClient(), paramiko.SSHClient()
 print(ssh_producer, ssh_consumer)
 
@@ -67,7 +66,7 @@ for ssh in [ssh_producer, ssh_consumer]:
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     ssh.connect(instance_dns[instance],
                 username = 'ec2-user',
-                key_filename='/Users/catonbrewster/Box Sync/Y2 - Q1 Fall/LSC/Project/covid-policy-sentiments/macs_30123_CB.pem')
+                key_filename=PEM_KEY_FILENAME)
     
     with SCPClient(ssh.get_transport()) as scp:
         scp.put(code[instance])
@@ -103,15 +102,29 @@ else:
 ssh_consumer.close; ssh_producer.close()
 
 
-# check bucket
-my_bucket = bucket
-for my_bucket_object in my_bucket.objects.all():
-    print(my_bucket_object.key)
+'''
+# (for personal use) 
 
+# Check objects in bucket
+name = "lsc-tweets"
+name = "lsc-sentiments"
+s3_resource = boto3.resource('s3')
+bucket_resource = s3_resource.Bucket(name)
+[obj.key for obj in bucket_resource.objects.all()]
 
-'''# (for personal use): Delete everything as needed
+paginator = client.get_paginator('list_objects')
+page_iterator = paginator.paginate(Bucket=name)
+
 s3 = boto3.resource('s3')
-bucket = s3.Bucket('lsc-project-2')
+summaries = bucket.objects.all()
+files = []
+for file in summaries:
+    files.append(file.key)
+dt = jsonify({"files": files})
+
+# Delete everything as needed
+s3 = boto3.resource('s3')
+bucket = s3.Bucket('lsc-sentiments')
 bucket.objects.all().delete()
 bucket.delete()
 
@@ -121,10 +134,9 @@ for instance in ec2.instances.all():
     ids.append(instance.id)
 ec2.instances.filter(InstanceIds = ids).terminate()
 
-response = client.delete_stream(
+response = kinesis.delete_stream(
     StreamName='twitter_stream',
     EnforceConsumerDeletion=True)
-waiter = kinesis.get_waiter('stream_deleted')
-waiter.wait(StreamName='twitter_stream')
+
 
 '''

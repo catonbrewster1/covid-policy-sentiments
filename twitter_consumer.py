@@ -1,90 +1,58 @@
 import boto3
 import time
 import json
-from transformers import pipeline
-import sagemaker
-from sagemaker.huggingface.model import HuggingFaceModel
+import requests
+import re
 
+url = "https://427e20rcv8.execute-api.us-east-1.amazonaws.com/dev/search"
 
-data = {
-  "created_at": "Thu Jun 22 21:00:00 +0000 2017",
-  "id": 877994604561387500,
-  "id_str": "877994604561387520",
-  "text": "Creating a Grocery List Manager Using Angular, Part 1: Add &amp; Display Items https://t.co/xFox78juL1 #Angular",
-  "truncated": False,
-  "entities": {
-    "hashtags": [{
-      "text": "Angular",
-      "indices": [103, 111]
-    }],
-    "symbols": [],
-    "user_mentions": [],
-    "urls": [{
-      "url": "https://t.co/xFox78juL1",
-      "expanded_url": "http://buff.ly/2sr60pf",
-      "display_url": "buff.ly/2sr60pf",
-      "indices": [79, 102]
-    }]
-  },
-  "source": "<a href=\"http://bufferapp.com\" rel=\"nofollow\">Buffer</a>",
-  "user": {
-    "id": 772682964,
-    "id_str": "772682964",
-    "name": "SitePoint JavaScript",
-    "screen_name": "SitePointJS",
-    "location": "Melbourne, Australia",
-    "description": "Keep up with JavaScript tutorials, tips, tricks and articles at SitePoint.",
-    "url": "http://t.co/cCH13gqeUK",
-    "entities": {
-      "url": {
-        "urls": [{
-          "url": "http://t.co/cCH13gqeUK",
-          "expanded_url": "https://www.sitepoint.com/javascript",
-          "display_url": "sitepoint.com/javascript",
-          "indices": [0, 22]
-        }]
-      },
-      "description": {
-        "urls": []
-      }
-    },
-    "protected": False,
-    "followers_count": 2145,
-    "friends_count": 18,
-    "listed_count": 328,
-    "created_at": "Wed Aug 22 02:06:33 +0000 2012",
-    "favourites_count": 57,
-    "utc_offset": 43200,
-    "time_zone": "Wellington",
-  },
-}
-
-
-kinesis = boto3.client('kinesis', region_name='us-east-1')
+s3 = boto3.client('s3')
+kinesis = boto3.client('kinesis')
 shard_it = kinesis.get_shard_iterator(StreamName="twitter_stream",
                                      ShardId='shardId-000000000000',
                                      ShardIteratorType='LATEST'
                                      )["ShardIterator"]
 
-
+i = 0
 while True:
-
+    print(i)
     out = kinesis.get_records(ShardIterator=shard_it,
                               Limit=1)
-    for i, o in enumerate(out['Records']):
+    for o in out['Records']:
         data = json.loads(o["Data"])
-        #get the names of the variables we want to run sentiment analysis on
-        tweet = data["text"]
-        #data["sentiment"] 
-        print(tweet)
+        tweet = data["tweet"]
+
+        #remove @s, links, and non-alphanumeric characters
+        tweet_clean = re.sub("@[A-Za-z0-9_]+","", tweet)
+        tweet_clean = re.sub(r"http\S+", "", tweet_clean)
+        tweet_clean = re.sub(r"www.\S+", "", tweet_clean)
+        tweet_clean = re.sub("[^A-Za-z0-9]"," ", tweet_clean)
+
+        # save only info we want in s3 bucket
+        tweet_info = {}
+        tweet_info["id"] = data["id"]
+        tweet_info["tweet"] = tweet_clean
+        
+        #run sentiment analysis 
+        payload = {
+            'text': tweet_clean,
+            'max': False 
+        }
+        response = requests.post(url, json=payload)
+        ans = json.loads(response.text)
+        while ans.get("message", "") == 'Endpoint request timed out':
+            response = requests.post(url, json=payload)
+            ans = json.loads(response.text)
+        tweet_info["sentiment"] = ans
+        print(ans)
+
         #add json file to bucket
-        file_name = data["id_str"] + ".json"
-        s3.put_object(Body=json.dumps(data),
-                  Bucket = 'lsc-project-2', 
-                  Key = file_name)
-        if i == 100: 
-          break
+        file_name = str(tweet_info["id"]) + ".json"
+        s3.put_object(Body=json.dumps(tweet_info),
+                Bucket = 'lsc-sentiments', 
+                Key = file_name)
 
     shard_it = out['NextShardIterator']
     time.sleep(0.2)
-    predictor.delete_endpoint()
+    print('done')
+    i += 1
