@@ -80,7 +80,7 @@ while True:
         #add json file to bucket
         file_name = data["id_str"] + ".json"
         s3.put_object(Body=json.dumps(data),
-                  Bucket = 'lsc-project', 
+                  Bucket = 'lsc-project-2', 
                   Key = file_name)
         if i == 100: 
           break

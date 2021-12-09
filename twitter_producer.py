@@ -3,21 +3,17 @@ import time
 import random
 import datetime
 import json
-import json, tweepy, time, sys, os, random
+import twint
+import nest_asyncio
+nest_asyncio.apply()
 
 kinesis = boto3.client('kinesis', region_name='us-east-1')
 
 #Continuously write random stock data into Kinesis stream
-CONSUMER_KEY = "bzVIDZamtYW6UKOk1V7DSFThW"
-CONSUMER_SECRET = "7i5cVfdKUobpMVQaz6R1RbM3hhqLuTLSf2qfTRlVd5xcR4uYHk"
-ACCESS_KEY = "1467552250457473026-685etojXLSdPjZkbBrxtwo5aSKExpO"
-ACCESS_SECRET = "KcPKGnpnylEZ26jivTZUC2nrRNL2CoJVpCcQED0RklP8R"
-
-auth = tweepy.OAuthHandler(CONSUMER_KEY, CONSUMER_SECRET)
-aut.set_access_token(ACCESS_KEY, ACCESS_SECRET)
-
-api = tweepy.API(auth, wait_on_rate_limi=True, 
-                    wait_on_rate_limit_notify=True)
+#CONSUMER_KEY = "bzVIDZamtYW6UKOk1V7DSFThW"
+#CONSUMER_SECRET = "7i5cVfdKUobpMVQaz6R1RbM3hhqLuTLSf2qfTRlVd5xcR4uYHk"
+#ACCESS_KEY = "1467552250457473026-685etojXLSdPjZkbBrxtwo5aSKExpO"
+#ACCESS_SECRET = "KcPKGnpnylEZ26jivTZUC2nrRNL2CoJVpCcQED0RklP8R"
 
 SEARCH_TERMS = ["covid", 
                 "covid-19", 
@@ -29,25 +25,18 @@ SEARCH_TERMS = ["covid",
                 "school closing", 
                 "schoolclosing"]
 
-def getReferrer():
-    q = " OR ".join(SEARCH_TERMS)
-    places = api.geo_search(query="United States", granularity="country")
-    place_id = places[0].id
-    ht_list_no_RT = q + " -filter:retweets"
-    for tweet in tweepy.Cursor(api.search, 
-                                q=(ht_list_no_RT) and ("place:%s" % place_id), 
-                                tweet_mode='extended', 
-                                count=100, 
-                                include_entities=True,
-                                lang="en").items():
-                                    
-        tweet_dic = tweet._json
-        return tweet_dic
-    
-
+c = twint.Config()
+c.Search = "covid"
+c.Pandas = True
+c.Limit = 20
+c.Hide_output = True
+twint.run.Search(c) 
+df = twint.storage.panda.Tweets_df
+df_dict = df.to_dict()
 while True:
+
     kinesis.put_record(StreamName="twitter_stream",
-                       Data=json.dumps(getReferrer()),
+                       Data=json.dumps(df_dict),
                        PartitionKey="partitionkey")
 
     

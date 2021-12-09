@@ -22,7 +22,9 @@ bearer token: AAAAAAAAAAAAAAAAAAAAANtFWgEAAAAAmNGQiuKLEfM6%2F4KDDy7I8GGyfbw%3DLj
 session = boto3.Session(profile_name='default')
 kinesis = session.client('kinesis')
 s3 = boto3.client('s3')
-bucket = s3.create_bucket(Bucket='lsc-project')
+
+ec2 = session.resource('ec2')
+ec2_client = session.client('ec2')
 
 #creating ec2 instance
 
@@ -44,15 +46,19 @@ try:
                                 )
 except Exception:
     pass
-waiter = kinesis.get_waiter('stream_exists')
-waiter.wait(StreamName='twitter_stream')
 
 # Wait until EC2 instances are running before moving on
 waiter = ec2_client.get_waiter('instance_running')
 waiter.wait(InstanceIds=[instance.id for instance in instances])
 
+# Get producer/consumer code running on EC2 instances
+instance_dns = [instance.public_dns_name 
+                 for instance in ec2.instances.all() 
+                 if instance.state['Name'] == 'running'
+               ]
 code = ['twitter_consumer.py', 'twitter_producer.py']
 ssh_producer, ssh_consumer = paramiko.SSHClient(), paramiko.SSHClient()
+print(ssh_producer, ssh_consumer)
 
 # Install boto3 on each EC2 instance and Copy our producer/consumer code onto producer/consumer EC2 instances
 instance = 0
@@ -98,14 +104,14 @@ ssh_consumer.close; ssh_producer.close()
 
 
 # check bucket
-my_bucket = "lsc-project"
+my_bucket = bucket
 for my_bucket_object in my_bucket.objects.all():
     print(my_bucket_object.key)
 
-'''
-(for personal use): Delete everything as needed
+
+'''# (for personal use): Delete everything as needed
 s3 = boto3.resource('s3')
-bucket = s3.Bucket('lsc-project')
+bucket = s3.Bucket('lsc-project-2')
 bucket.objects.all().delete()
 bucket.delete()
 
@@ -117,9 +123,8 @@ ec2.instances.filter(InstanceIds = ids).terminate()
 
 response = client.delete_stream(
     StreamName='twitter_stream',
-    EnforceConsumerDeletion=True
+    EnforceConsumerDeletion=True)
 waiter = kinesis.get_waiter('stream_deleted')
 waiter.wait(StreamName='twitter_stream')
 
-)
 '''
