@@ -12,8 +12,8 @@ import paramiko
 from scp import SCPClient
 
 #UPDATE AS NEEDED
-PEM_KEY_NAME = 'macs_30123_CB'
-PEM_KEY_FILENAME = '/Users/catonbrewster/Box Sync/Y2 - Q1 Fall/LSC/Project/covid-policy-sentiments/macs_30123_CB.pem'
+PEM_KEY_NAME = 'macs30123'
+PEM_KEY_FILENAME = '/Users/gabrielapalaciosgomez/Documents/UChicago/Fall_2021/Large_Scale/covid-policy-sentiments/macs30123.pem'
 
 
 # Launch session and clients
@@ -24,7 +24,7 @@ ec2_client = session.client('ec2')
 
 # Create bucket to store results in
 s3 = boto3.client('s3')
-bucket = s3.create_bucket(Bucket='lsc-sentiments')
+bucket = s3.create_bucket(Bucket='lsc-sentiments-final-project')
 
 # Create ec2 instances (x2)
 instances = ec2.create_instances(ImageId='ami-02e136e904f3da870',
@@ -32,7 +32,7 @@ instances = ec2.create_instances(ImageId='ami-02e136e904f3da870',
                                  MaxCount=2,
                                  InstanceType='t2.micro',
                                  KeyName=PEM_KEY_NAME,
-                                 SecurityGroupIds=['sg-01f3da276301638af'],
+                                 SecurityGroupIds=['sg-073a7287de64c828c'],
                                  SecurityGroups=['launch-wizard-1'],
                                  IamInstanceProfile=
                                      {'Name': 'EMR_EC2_DefaultRole'},

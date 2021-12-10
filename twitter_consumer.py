@@ -4,6 +4,20 @@ import json
 import requests
 import re
 
+def clean_results(text, emotions_dict):
+    split_emotions = re.split('\) +', text[3:])
+    emotions_dict['anger'] = 0
+    emotions_dict['disgust'] = 0
+    emotions_dict['fear'] = 0
+    emotions_dict['surprise'] = 0
+    emotions_dict['joy'] = 0
+    
+    for emotion in split_emotions:
+        e = emotion.split()
+        emotions_dict[e[0]] = e[1]
+        
+
+
 url = "https://427e20rcv8.execute-api.us-east-1.amazonaws.com/dev/search"
 
 s3 = boto3.client('s3')
@@ -32,6 +46,7 @@ while True:
         tweet_info = {}
         tweet_info["id"] = data["id"]
         tweet_info["tweet"] = tweet_clean
+        tweet_info["date"] = data["date"]
         
         #run sentiment analysis 
         payload = {
@@ -44,12 +59,17 @@ while True:
             response = requests.post(url, json=payload)
             ans = json.loads(response.text)
         tweet_info["sentiment"] = ans
-        print(ans)
-
+        
         #add json file to bucket
+        if ('error' in ans) or ('message' in ans):
+            continue
+        print('error is in answer', 'error' in ans)
+        print(ans)
+        print('cleaning results and putting into bucket')
+        clean_results(ans['results'], tweet_info)
         file_name = str(tweet_info["id"]) + ".json"
         s3.put_object(Body=json.dumps(tweet_info),
-                Bucket = 'lsc-sentiments', 
+                Bucket = 'lsc-sentiments-final-project', 
                 Key = file_name)
 
     shard_it = out['NextShardIterator']

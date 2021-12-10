@@ -11,7 +11,7 @@ import pickle
 
 kinesis = boto3.client('kinesis', region_name='us-east-1')
 s3 = boto3.client('s3')
-bucket = s3.create_bucket(Bucket='lsc-tweets')
+bucket = s3.create_bucket(Bucket='lsc-tweets-finalproject')
 
 SEARCH_TERMS = ["covid", 
                 "covid-19", 
@@ -50,7 +50,7 @@ serialized_dict = pickle.dumps(df_dict)
 if df_dict: 
     file_name = "tweets.json"
 
-    response = s3.put_object(Bucket='lsc-tweets', Key=file_name, Body=serialized_dict)
+    response = s3.put_object(Bucket='lsc-tweets-finalproject', Key=file_name, Body=serialized_dict)
     status = response.get("ResponseMetadata", {}).get("HTTPStatusCode")
 
     if status == 200:
@@ -64,12 +64,12 @@ else:
 
 '''
 #check objects in bucket
-for key in s3.list_objects(Bucket='lsc-tweets')['Contents']:
+for key in s3.list_objects(Bucket='lsc-tweets-finalproject')['Contents']:
     print(key['Key'])
 
 #empty & delete bucket
 s3_rec = boto3.resource('s3')
-bucket = s3_rec.Bucket('lsc-tweets')
+bucket = s3_rec.Bucket('lsc-tweets-finalproject')
 bucket.objects.all().delete()
 bucket.delete()
 '''

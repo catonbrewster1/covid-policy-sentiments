@@ -13,7 +13,7 @@ kinesis = boto3.client('kinesis', region_name='us-east-1')
 s3 = boto3.client('s3')
 
 # Get data from S3 Bucket
-obj = s3.get_object(Bucket='lsc-tweets', Key='tweets.json')
+obj = s3.get_object(Bucket='lsc-tweets-finalproject', Key='tweets.json')
 obj_ser = obj["Body"].read()
 data = pickle.loads(obj_ser)
 
