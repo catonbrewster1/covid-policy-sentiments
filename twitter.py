@@ -12,19 +12,24 @@ import paramiko
 from scp import SCPClient
 
 #UPDATE AS NEEDED
-PEM_KEY_NAME = 'macs30123'
-PEM_KEY_FILENAME = '/Users/gabrielapalaciosgomez/Documents/UChicago/Fall_2021/Large_Scale/covid-policy-sentiments/macs30123.pem'
+PEM_KEY_NAME = 'stock_stream'
+PEM_KEY_FILENAME = 'stock_stream.pem'
+SEC_GROUP_ID = 'sg-0ab0bb5af0aa4735d'
+
+
+
 
 
 # Launch session and clients
 session = boto3.Session(profile_name='default')
 kinesis = session.client('kinesis')
+BUCKET_NAME = 'lsc-sentiments'
 ec2 = session.resource('ec2')
 ec2_client = session.client('ec2')
 
 # Create bucket to store results in
 s3 = boto3.client('s3')
-bucket = s3.create_bucket(Bucket='lsc-sentiments-final-project')
+bucket = s3.create_bucket(Bucket=BUCKET_NAME)
 
 # Create ec2 instances (x2)
 instances = ec2.create_instances(ImageId='ami-02e136e904f3da870',
@@ -32,7 +37,7 @@ instances = ec2.create_instances(ImageId='ami-02e136e904f3da870',
                                  MaxCount=2,
                                  InstanceType='t2.micro',
                                  KeyName=PEM_KEY_NAME,
-                                 SecurityGroupIds=['sg-073a7287de64c828c'],
+                                 SecurityGroupIds=[SEC_GROUP_ID],
                                  SecurityGroups=['launch-wizard-1'],
                                  IamInstanceProfile=
                                      {'Name': 'EMR_EC2_DefaultRole'},
@@ -113,8 +118,6 @@ s3_resource = boto3.resource('s3')
 bucket_resource = s3_resource.Bucket(name)
 [obj.key for obj in bucket_resource.objects.all()]
 
-paginator = client.get_paginator('list_objects')
-page_iterator = paginator.paginate(Bucket=name)
 
 s3 = boto3.resource('s3')
 summaries = bucket.objects.all()
