@@ -55,7 +55,8 @@ The following are the steps to simulate what we did:
 
 The main tasks and team members involved in each one are the following:
 
+- Scraping the Twitter data using twint - Caton Brewster
 - Using Docker to push the NLP model into a lambda function and deploy the lambda function - Antonia Sanhueza and Gabriela Palacios
-- Kinesis Stream - All
-- Visualization - Gabriela Palacios and Caton Brewster
+- Developing the Kinesis Stream - All (we updated it several different times throughout) 
+- Processing the data and creating visualizations - Gabriela Palacios and Caton Brewster
 - ReadMe - All
