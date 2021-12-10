@@ -1,11 +1,7 @@
-Caton Brewster
 
-Gabriela Palacios
-
-Antonia Sanhueza
 
 # Large Scale Project: Streaming COVID-19 sentiments 
-
+Caton Brewster, Gabriela Palacios, Antonia Sanhueza
 
 
 ## 1. Social problem
