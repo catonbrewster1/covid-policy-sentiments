@@ -59,6 +59,7 @@ code = ['twitter_producer.py', 'twitter_consumer.py']
 ssh_producer, ssh_consumer = paramiko.SSHClient(), paramiko.SSHClient()
 print(ssh_producer, ssh_consumer)
 
+
 # Install boto3 on each EC2 instance and Copy our producer/consumer code onto producer/consumer EC2 instances
 instance = 0
 stdin, stdout, stderr = [[None, None] for i in range(3)]
