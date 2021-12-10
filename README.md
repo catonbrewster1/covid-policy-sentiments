@@ -43,10 +43,11 @@ We use Twitter data from Mexico City and Guadalajara, Mexico. For the reasons ou
 
 ## 6. How to run the project
 
-The following are the steps to simulate what we did:
-1) Run [gen_data_mini.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/gen_data_mini.py) to generate the initial s3 bucket with the twitter data
-2) Run the kinesis stream using the [twitter.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter.py) file. For the file to run correctly, you need to add your personal security group id, pem key name, and pem key file name as stated in the line 14-20.
-3) Use the pyspark notebook to produce the visualization[https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/visualization.ipynb]
+The project assumes a pem file named "twitter_lsc_key.pem" has been generated and stored in the project folder before running. 
+
+1) Run [gen_data_extended.py](gen_data_extended.py) to scrape Twitter data and save it into an s3 bucket
+2) Run [twitter.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter.py) to create the s3 bucket, kinesis stream, and ec2 instances to simulate streaming twitter data that is processed and analysed by the consumer on ec2 instances. Both [twitter_producer.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter_producer.py) and [twitter_consumer.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter_consumer.py) are run from [twitter.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter.py). NOTE: you will need to update the security group ID associated with your pem file on line 14 of [twitter.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter.py) for it to run.
+3) Launch an EMR Notebook Cluster from your AWS Console and upload the pyspark notebook [visualization](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/visualization.ipynb) to recreate the visualizations shown above in Results. 
 
 ## 6. References
 
