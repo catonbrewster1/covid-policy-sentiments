@@ -6,9 +6,10 @@ Caton Brewster, Gabriela Palacios, Antonia Sanhueza
 
 ## 1. Social problem
 
-It has been almost 2 years since Covid-19 hit the world. Since then, we have seen many different policies at the country, state, city and community level enforced and lifted as the virus and contagions change. The opinions around these policies are varied, some are happy when there are more constraints and being more careful, other oppose 'oppresive' policies and rather give people more freedom. In this project, we want to provide policymakers with a tool  to analyze public sentiment around such policies based on Twitter data.  
+It has been almost 2 years since Covid-19 hit the world. Since then, we have seen many different policies and recommentations issued by International Organizations, countries, states, and cities enforced and lifted as the virus and contagions change. The opinions around these policies are varied, some are positive when there are more constraints and being more careful, other oppose 'oppresive' policies and rather give people more freedom and allow for economic recovery. In this project, we want to provide policymakers with a tool to analyze public sentiment around Covid-19 based on Twitter data, so they can take better and informed decisiones about future policies.  
 
-In particular, we will be pulling data from Santiago, Chile as the Covid-19 measures for each municipality are announced on a weekly basis based on a 5 stage model.  Every week the Ministry of Health announces which municipalities will move forward, go back or remain the same.  That means that from one week to another people have to be on lock down, or your 200 people wedding has to be reduced to 50, you don't know what they are going to announce. 
+In particular, we will use data from two cities in Mexico: Mexico City and Guadalajara. We chose these cities to contrast a liberal city such as Mexico City, and Guadalajara, which is more conservative. In Mexico there has not been Federal mandatory policies regarding quarantine and vaccines, however each state has issued its recommmendations and shut down firms in non essential economic activities.
+
 
 ## 2. Structure of the project
 
@@ -46,3 +47,11 @@ Our data are tweets from users of Santiago, Chile between DATE and DATE.
 
 For our project, we proposed to analyze the psychological effects on the public of policies associated with COVID-19 over the past year. We will choose several cities and/or states and track major changes in policies related to travel, masks, vaccines, and school closings. Following major changes to these policies, we will analyze public sentiment on Twitter related toward various COVID-related concepts. We will also explore whether there is heterogeneity in the responses based on political majorities. We think this analysis may help to understand any negative externalities of policies on public wellbeing and opinions which may ultimately affect their compliance in unexpected ways. We plan to use AWS services to perform our data processing and analysis. We will find data related to COVID policies over time. We will use the Twitter API to get Twitter data and use an EMR cluster to clean the data, parallelize the twitter’s sentiment analysis, and aggregate it by building an overall sentiment index of the determined concept. We plan to use AWS comprehend and/or upload a huggingface model to an EC2 or lambda to do the NLP analysis.Our tentative timeline is as follows:
 
+## 6. Team responsibilities
+
+The main tasks and team members involved in each one are the following:
+
+- Using Docker to push the NLP model into a lambda function and deploy the lambda function - Antonia Sanhueza and Gabriela Palacios
+- Kinesis Stream - All
+- Visualization - Gabriela Palacios and Caton Brewster
+- ReadMe - All
