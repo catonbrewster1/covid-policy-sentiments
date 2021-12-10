@@ -13,8 +13,8 @@ BUCKET_NAME = 'lsc-tweets'
 kinesis = boto3.client('kinesis', region_name='us-east-1')
 s3 = boto3.client('s3')
 
-
-# Simulate streaming data by looping through tweets and feeding into kinesis
+# Simulate streaming Twitter data
+# Loop through tweets from s3 bucket and feed into kinesis
 s3_rec = boto3.resource('s3')
 my_bucket = s3_rec.Bucket(BUCKET_NAME)
 for files in my_bucket.objects.all():

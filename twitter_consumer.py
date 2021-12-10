@@ -4,6 +4,16 @@ import json
 import requests
 import re
 
+BUCKET_NAME = 'lsc-sentiments'
+lambda_url = "https://427e20rcv8.execute-api.us-east-1.amazonaws.com/dev/search"
+
+s3 = boto3.client('s3')
+kinesis = boto3.client('kinesis')
+shard_it = kinesis.get_shard_iterator(StreamName="twitter_stream",
+                                     ShardId='shardId-000000000000',
+                                     ShardIteratorType='LATEST'
+                                     )["ShardIterator"]
+
 def clean_results(text, emotions_dict):
     split_emotions = re.split('\) +', text[3:])
     emotions_dict['anger'] = 0
@@ -15,17 +25,6 @@ def clean_results(text, emotions_dict):
     for emotion in split_emotions:
         e = emotion.split()
         emotions_dict[e[0]] = e[1]
-        
-
-BUCKET_NAME = 'lsc-sentiments'
-url = "https://427e20rcv8.execute-api.us-east-1.amazonaws.com/dev/search"
-
-s3 = boto3.client('s3')
-kinesis = boto3.client('kinesis')
-shard_it = kinesis.get_shard_iterator(StreamName="twitter_stream",
-                                     ShardId='shardId-000000000000',
-                                     ShardIteratorType='LATEST'
-                                     )["ShardIterator"]
 
 i = 0
 while True:
@@ -55,19 +54,18 @@ while True:
             'text': tweet_clean,
             'max': False 
         }
-        response = requests.post(url, json=payload)
+        response = requests.post(lambda_url, json=payload)
         ans = json.loads(response.text)
         while ans.get("message", "") == 'Endpoint request timed out':
-            response = requests.post(url, json=payload)
+            response = requests.post(lambda_url, json=payload)
             ans = json.loads(response.text)
         tweet_info["sentiment"] = ans
-        
-        #add json file to bucket
         if ('error' in ans) or ('message' in ans):
             print('error is in answer', 'error' in ans)
             continue
-        print(ans)
-        print('cleaning results and putting into bucket')
+        print(ans)    
+
+        #add clean tweet info to bucket
         clean_results(ans['results'], tweet_info)
         file_name = str(tweet_info["id"]) + ".json"
         s3.put_object(Body=json.dumps(tweet_info),

@@ -9,11 +9,13 @@ from datetime import date, timedelta
 import time
 import pickle
 
+# create s3 bucket to store tweets
 bucket_name = 'lsc-tweets'
 kinesis = boto3.client('kinesis', region_name='us-east-1')
 s3 = boto3.client('s3')
 bucket = s3.create_bucket(Bucket=bucket_name)
 
+#save search terms, date range, and geo information for query
 SEARCH_TERMS = ["covid", 
                 "covid-19", 
                 "covid19", 
@@ -33,6 +35,7 @@ dates.reverse()
 
 geo_dict = {"CDMX": "19.4326, -99.1332, 20km", 
             "GDL": "20.6597, -103.3496, 20km"}
+
 
 # scrape 20 tweets each day over 10 days 
 # in Mexico City and Guadalajara
@@ -70,23 +73,3 @@ for loc in geo_dict.keys():
         else: 
             print("didn't add")
         time.sleep(10)
-
-
-'''
-for end_date in dates:
-    obj = s3.get_object(Bucket=bucket_name, Key=end_date + ".json")
-    obj_ser = obj["Body"].read()
-    data = pickle.loads(obj_ser)
-    break
-
-
-#check objects in bucket
-for key in s3.list_objects(Bucket=bucket_name)['Contents']:
-    print(key['Key'])
-
-#empty & delete bucket
-s3_rec = boto3.resource('s3')
-bucket = s3_rec.Bucket(bucket_name)
-bucket.objects.all().delete()
-bucket.delete()
-'''

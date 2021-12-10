@@ -11,14 +11,10 @@ import json
 import paramiko
 from scp import SCPClient
 
-#UPDATE AS NEEDED
-PEM_KEY_NAME = 'stock_stream'
-PEM_KEY_FILENAME = 'stock_stream.pem'
-SEC_GROUP_ID = 'sg-0ab0bb5af0aa4735d'
+SEC_GROUP_ID = 'sg-0ab0bb5af0aa4735d' #UPDATE AS NEEDED
 
-
-
-
+PEM_KEY_NAME = 'twitter_lsc_key'
+PEM_KEY_FILENAME = 'twitter_lsc_key.pem'
 
 # Launch session and clients
 session = boto3.Session(profile_name='default')
@@ -107,40 +103,3 @@ else:
 # Close ssh
 ssh_consumer.close; ssh_producer.close()
 
-
-'''
-# (for personal use) 
-
-# Check objects in bucket
-name = "lsc-tweets"
-name = "lsc-sentiments"
-s3_resource = boto3.resource('s3')
-bucket_resource = s3_resource.Bucket(name)
-[obj.key for obj in bucket_resource.objects.all()]
-
-
-s3 = boto3.resource('s3')
-summaries = bucket.objects.all()
-files = []
-for file in summaries:
-    files.append(file.key)
-dt = jsonify({"files": files})
-
-# Delete everything as needed
-s3 = boto3.resource('s3')
-bucket = s3.Bucket('lsc-sentiments')
-bucket.objects.all().delete()
-bucket.delete()
-
-ec2 = boto3.resource('ec2')
-ids = []
-for instance in ec2.instances.all():
-    ids.append(instance.id)
-ec2.instances.filter(InstanceIds = ids).terminate()
-
-response = kinesis.delete_stream(
-    StreamName='twitter_stream',
-    EnforceConsumerDeletion=True)
-
-
-'''
