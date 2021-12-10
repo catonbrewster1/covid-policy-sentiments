@@ -17,7 +17,7 @@ def clean_results(text, emotions_dict):
         emotions_dict[e[0]] = e[1]
         
 
-BUCKET_NAME = 'lsc-sentiments'
+BUCKET_NAME = 'lsc-sentiments-cbgpas'
 url = "https://427e20rcv8.execute-api.us-east-1.amazonaws.com/dev/search"
 
 s3 = boto3.client('s3')

@@ -1,0 +1,22 @@
+# Run in batch inside the folder find_emotions
+# Step 1
+
+img_name='find_emotions'
+aws_region=us-east-1
+aws_account_id=
+
+# Step 2: create and tag image
+docker build -t $img_name .
+#Step 3: create ECR repository
+aws ecr create-repository --region $aws_region --repository-name $img_name > /dev/null
+# Step 4: Login to aws ECR
+aws ecr get-login-password --region $aws_region | docker login --username AWS --password-stdin $aws_account_id.dkr.ecr.$aws_region.amazonaws.com
+# Step 5: tag image
+docker tag $img_name $aws_account_id.dkr.ecr.$aws_region.amazonaws.com/$img_name
+# Step 5: push image
+docker push $aws_account_id.dkr.ecr.$aws_region.amazonaws.com/$img_name
+# Step 6: to deploy lambda
+# Install serverless
+# Copy the sha digest return by the push, put it in the serverless yml and deploy de image
+serverless deploy
+Serverless deploy
