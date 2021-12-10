@@ -6,9 +6,9 @@ Caton Brewster, Gabriela Palacios, Antonia Sanhueza
 
 ## 1. Social problem
 
-It has been almost 2 years since Covid-19 hit the world. Since then, we have seen many different policies and recommentations issued by International Organizations, countries, states, and cities enforced and lifted as the virus and contagions change. The opinions around these policies are varied, some are positive when there are more constraints and being more careful, other oppose 'oppresive' policies and rather give people more freedom and allow for economic recovery. In this project, we want to provide policymakers with a tool to analyze public sentiment around Covid-19 based on Twitter data, so they can take better and informed decisiones about future policies.  
+It has been almost 2 years since Covid-19 hit the world. Since then, we have seen many different policies and recommentations issued by International Organizations, countries, states, and cities enforced and lifted as the virus and contagions change. The opinions around these policies are varied, some are positive when there are more constraints and being more careful, other oppose 'oppresive' policies and rather give people more freedom and allow for economic recovery. In this project, we want to provide policymakers with a tool to analyze public sentiment around Covid-19 based on Twitter data, so they can take better and informed decisions about future policies.  
 
-In particular, we will use data from two cities in Mexico: Mexico City and Guadalajara. We chose these cities to contrast a liberal city such as Mexico City, and Guadalajara, which is more conservative. In Mexico there has not been Federal mandatory policies regarding quarantine and vaccines, however each state has issued its recommmendations and shut down firms in non essential economic activities.
+In particular, we will use data from two cities in Mexico: Mexico City and Guadalajara. We chose these cities to contrast a liberal city such as Mexico City, and Guadalajara, which is more conservative. In Mexico there has not been Federal mandatory policies regarding quarantine and vaccines, however each state has issued its recommmendations and shut down firms in non-essential economic activities.
 
 
 ## 2. Structure of the project
