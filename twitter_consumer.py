@@ -48,6 +48,7 @@ while True:
         tweet_info["tweet"] = tweet_clean
         tweet_info["tweet"] = data["tweet"]
         tweet_info["date"] = data["date"]
+        tweet_info["geo"] = data["geo"]
         
         #run sentiment analysis 
         payload = {
@@ -67,7 +68,7 @@ while True:
             continue
         print(ans)
         print('cleaning results and putting into bucket')
-        #clean_results(ans['results'], tweet_info)
+        clean_results(ans['results'], tweet_info)
         file_name = str(tweet_info["id"]) + ".json"
         s3.put_object(Body=json.dumps(tweet_info),
                 Bucket = BUCKET_NAME, 

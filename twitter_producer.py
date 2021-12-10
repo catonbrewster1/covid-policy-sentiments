@@ -25,10 +25,10 @@ for files in my_bucket.objects.all():
     data = pickle.loads(obj_ser)
     for i in data.keys():
         tweet = {}
-        tweet["id"] = data["id"]
-        tweet["tweet"] = data["tweet"]
-        tweet["geo"] = data["geo"]
-        tweet["date"] = data["date"]
+        tweet["id"] = data[i]["id"]
+        tweet["tweet"] = data[i]["tweet"]
+        tweet["geo"] = data[i]["geo"]
+        tweet["date"] = data[i]["date"]
         kinesis.put_record(StreamName="twitter_stream",
                         Data=json.dumps(tweet),
                         PartitionKey="partitionkey")
