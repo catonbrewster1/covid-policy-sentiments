@@ -31,7 +31,7 @@ We set up the lambda function as a public url through a docker image, using AWS 
 One of the biggest benefits of using a lambda function is that it's free when not in use. When used, it costs just $0.20 per 1M requests, making it very cost-effective. The ECR is free up to 1GB and the next 9.999 TB are only $0.09 per GB per month ([Source](https://aws.amazon.com/ecr/pricing/)). Thus, the total cost of the lambda function is low in relation to other alternatives and is directly related to the size of the data we want to process.
 
 #### Visualizing with PySpark
-Due to restrictions with our AWS Educate accounts, we are unable to connect our Kinessis stream to a live dashboard using Amazon IoT and QuickSight. Therefore, our kinesis consumer stores the analyzed data in an s3 bucket. We then use PySpark on an EMR notebook to efficiently process and visualize the data. While the amount of Twitter data we use in this simulation is relatively small, we have designed a pipeline that uses tools that can be scaled as needed. 
+Due to restrictions with our AWS Educate accounts, we are unable to connect our Kinessis stream to a live dashboard using Amazon IoT and QuickSight. Therefore, our kinesis consumer stores the analyzed data in an s3 bucket. We then use PySpark on an EMR notebook to efficiently process and visualize the data. While the amount of Twitter data we use in this simulation is relatively small, we have designed a pipeline that uses tools that can be scaled as needed. The indicator we calculate is the average level of each sentiment for tweets on a given day.
 
 
 ## 4. Data
@@ -41,10 +41,13 @@ We use Twitter data from Mexico City and Guadalajara, Mexico. For the reasons ou
 
 ## 5. Results
 
+The overwhelming majority sentiment for most tweet is "other" in our data which is unsurprising. We find it more interesting to just tweet one of the seven emotions that the Huggingface model is able to detect. The x-axis is the date and the y-axis is the average level of the given sentiment for all tweets on that day.
+
 The visualizations for our 10 days of tweets are below: 
 ![image](https://user-images.githubusercontent.com/84205874/145641354-3f71d4f1-bd3b-4473-8dd2-369f38e9359f.png)
 ![image](https://user-images.githubusercontent.com/84205874/145641378-e069e62b-ef62-43fe-867a-73aab2b2d952.png)
 
+It's interesting to note the spike of emotions on November 30th for both cities. While in Mexico City, the majority of sentiment that day was sadness, in Guadalajara, it was sadness but with a notable amount of anger, as well. This example illistrates the type of monitoring one could do with an ongoing stream of Twitter data at scale.  
 
 ## 6. How to run the project
 
@@ -54,10 +57,7 @@ The project assumes a pem file named "twitter_lsc_key.pem" has been generated an
 2) Run [twitter.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter.py) to create the s3 bucket, kinesis stream, and ec2 instances to simulate streaming twitter data that is processed and analysed by the consumer on ec2 instances. Both [twitter_producer.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter_producer.py) and [twitter_consumer.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter_consumer.py) are run from [twitter.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter.py). NOTE: you will need to update the security group ID associated with your pem file on line 14 of [twitter.py](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/twitter.py) for it to run.
 3) Launch an EMR Notebook Cluster from your AWS Console and upload the pyspark notebook [visualization](https://github.com/catonbrewster1/covid-policy-sentiments/blob/main/visualization.ipynb) to recreate the visualizations shown above in Results. 
 
-## 6. References
-
-
-## 6. Team responsibilities
+## 7. Team responsibilities
 
 The main tasks and team members involved in each one are the following:
 
