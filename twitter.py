@@ -14,7 +14,7 @@ from scp import SCPClient
 #UPDATE AS NEEDED
 PEM_KEY_NAME = 'macs30123'
 PEM_KEY_FILENAME = '/Users/gabrielapalaciosgomez/Documents/UChicago/Fall_2021/Large_Scale/covid-policy-sentiments/macs30123.pem'
-
+BUCKET_NAME = 'lsc-sentiments'
 
 # Launch session and clients
 session = boto3.Session(profile_name='default')
@@ -24,7 +24,7 @@ ec2_client = session.client('ec2')
 
 # Create bucket to store results in
 s3 = boto3.client('s3')
-bucket = s3.create_bucket(Bucket='lsc-sentiments-final-project')
+bucket = s3.create_bucket(Bucket=BUCKET_NAME)
 
 # Create ec2 instances (x2)
 instances = ec2.create_instances(ImageId='ami-02e136e904f3da870',
@@ -113,8 +113,6 @@ s3_resource = boto3.resource('s3')
 bucket_resource = s3_resource.Bucket(name)
 [obj.key for obj in bucket_resource.objects.all()]
 
-paginator = client.get_paginator('list_objects')
-page_iterator = paginator.paginate(Bucket=name)
 
 s3 = boto3.resource('s3')
 summaries = bucket.objects.all()

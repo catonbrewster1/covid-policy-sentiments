@@ -17,7 +17,7 @@ def clean_results(text, emotions_dict):
         emotions_dict[e[0]] = e[1]
         
 
-
+BUCKET_NAME = 'lsc-sentiments'
 url = "https://427e20rcv8.execute-api.us-east-1.amazonaws.com/dev/search"
 
 s3 = boto3.client('s3')
@@ -46,6 +46,7 @@ while True:
         tweet_info = {}
         tweet_info["id"] = data["id"]
         tweet_info["tweet"] = tweet_clean
+        tweet_info["tweet"] = data["tweet"]
         tweet_info["date"] = data["date"]
         
         #run sentiment analysis 
@@ -62,14 +63,14 @@ while True:
         
         #add json file to bucket
         if ('error' in ans) or ('message' in ans):
+            print('error is in answer', 'error' in ans)
             continue
-        print('error is in answer', 'error' in ans)
         print(ans)
         print('cleaning results and putting into bucket')
-        clean_results(ans['results'], tweet_info)
+        #clean_results(ans['results'], tweet_info)
         file_name = str(tweet_info["id"]) + ".json"
         s3.put_object(Body=json.dumps(tweet_info),
-                Bucket = 'lsc-sentiments-final-project', 
+                Bucket = BUCKET_NAME, 
                 Key = file_name)
 
     shard_it = out['NextShardIterator']

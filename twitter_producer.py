@@ -9,19 +9,28 @@ nest_asyncio.apply()
 import pandas as pd
 import pickle
 
+BUCKET_NAME = 'lsc-tweets'
 kinesis = boto3.client('kinesis', region_name='us-east-1')
 s3 = boto3.client('s3')
 
-# Get data from S3 Bucket
-obj = s3.get_object(Bucket='lsc-tweets-finalproject', Key='tweets.json')
-obj_ser = obj["Body"].read()
-data = pickle.loads(obj_ser)
 
-while True:
-    # Simulate streaming data by continuously looping through tweets
+# Simulate streaming data by looping through tweets and feeding into kinesis
+s3_rec = boto3.resource('s3')
+my_bucket = s3_rec.Bucket(BUCKET_NAME)
+for files in my_bucket.objects.all():
+    file_name = files.key
+    print(file_name)
+    obj = s3.get_object(Bucket=BUCKET_NAME, Key=file_name)
+    obj_ser = obj["Body"].read()
+    data = pickle.loads(obj_ser)
     for i in data.keys():
+        tweet = {}
+        tweet["id"] = data["id"]
+        tweet["tweet"] = data["tweet"]
+        tweet["geo"] = data["geo"]
+        tweet["date"] = data["date"]
         kinesis.put_record(StreamName="twitter_stream",
-                       Data=json.dumps(data[i]),
-                       PartitionKey="partitionkey")
+                        Data=json.dumps(tweet),
+                        PartitionKey="partitionkey")
 
     
