@@ -41,6 +41,11 @@ We use Twitter data from Mexico City and Guadalajara, Mexico. For the reasons ou
 
 ## 5. Results
 
+The visualizations for our 10 days of tweets are below: 
+![image](https://user-images.githubusercontent.com/84205874/145641354-3f71d4f1-bd3b-4473-8dd2-369f38e9359f.png)
+![image](https://user-images.githubusercontent.com/84205874/145641378-e069e62b-ef62-43fe-867a-73aab2b2d952.png)
+
+
 ## 6. How to run the project
 
 The project assumes a pem file named "twitter_lsc_key.pem" has been generated and stored in the project folder before running. 
