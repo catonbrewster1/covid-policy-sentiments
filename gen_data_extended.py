@@ -21,7 +21,7 @@ SEARCH_TERMS = ["covid",
 QUERY = " OR ".join(SEARCH_TERMS)
 
 start_date = date(2021, 11, 30)
-stop_date = date(2021, 12, 5)
+stop_date = date(2021, 12, 11)
 
 def daterange(start_date, stop_date):
     for n in range(int((stop_date - start_date).days)):
@@ -34,7 +34,7 @@ dates.reverse()
 geo_dict = {"CDMX": "19.4326, -99.1332, 20km", 
             "GDL": "20.6597, -103.3496, 20km"}
 
-# scrape 20 tweets each day from the last 10 days 
+# scrape 20 tweets each day over 10 days 
 # in Mexico City and Guadalajara
 for loc in geo_dict.keys():
     for end_date in dates:
