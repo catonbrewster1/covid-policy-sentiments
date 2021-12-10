@@ -9,7 +9,7 @@ nest_asyncio.apply()
 import pandas as pd
 import pickle
 
-BUCKET_NAME = 'lsc-tweets-mini-antonia'
+BUCKET_NAME = 'lsc-tweets'
 kinesis = boto3.client('kinesis', region_name='us-east-1')
 s3 = boto3.client('s3')
 

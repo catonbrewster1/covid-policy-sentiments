@@ -12,18 +12,18 @@ import paramiko
 from scp import SCPClient
 
 #UPDATE AS NEEDED
-#PEM_KEY_NAME = 'macs30123'
 PEM_KEY_NAME = 'stock_stream'
-#PEM_KEY_FILENAME = '/Users/gabrielapalaciosgomez/Documents/UChicago/Fall_2021/Large_Scale/covid-policy-sentiments/macs30123.pem'
 PEM_KEY_FILENAME = 'stock_stream.pem'
-# SEC_GROUP_ID = 'sg-073a7287de64c828c'
 SEC_GROUP_ID = 'sg-0ab0bb5af0aa4735d'
-BUCKET_NAME = 'lsc-sentiments-cbgpas'
+
+
+
 
 
 # Launch session and clients
 session = boto3.Session(profile_name='default')
 kinesis = session.client('kinesis')
+BUCKET_NAME = 'lsc-sentiments'
 ec2 = session.resource('ec2')
 ec2_client = session.client('ec2')
 
